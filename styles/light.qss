@@ -1,0 +1,71 @@
+/* Light theme for GreedySnake */
+
+/* Base window and fonts */
+QWidget {
+    background-color: #f5f7fa;
+    color: #222222;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    font-size: 14px;
+}
+
+QMainWindow, QStackedWidget {
+    background-color: #f5f7fa;
+}
+
+/* Title label on StartPage */
+QLabel#titleLabel, QLabel[objectName="titleLabel"] {
+    color: #111111;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #ffffff;
+    color: #222222;
+    border: 1px solid #d0d7e3;
+    border-radius: 8px;
+    padding: 8px 14px;
+}
+QPushButton:hover {
+    background-color: #eef4fb;
+    border-color: #aac3f0;
+}
+QPushButton:pressed {
+    background-color: #dbe8fb;
+}
+
+/* Emphasized start button (common name used in StartPage) */
+QPushButton#startButton, QPushButton[objectName="startButton"] {
+    background-color: #219653;
+    color: #ffffff;
+    border: none;
+}
+QPushButton#startButton:hover {
+    background-color: #2eb76a;
+}
+
+/* UpBar (toolbar) */
+QWidget {
+    /* default widget settings already applied; keep toolbar subtle */
+}
+/* Make the small labels (score/time) slightly muted */
+QLabel {
+    color: #3a3f47;
+}
+
+/* Game area border to visually separate */
+GameArea, QWidget#gameArea, QWidget[objectName="gameArea"] {
+    border: 1px solid #dfe7ef;
+    background-color: #ffffff;
+}
+
+/* Small helpers */
+QLabel#scoreLabel, QLabel#timeLabel { font-weight: 600; }
+
+/* Scrollbars, if any */
+QScrollBar:vertical { background: transparent; width: 10px; }
+QScrollBar::handle:vertical { background: #c6d0df; border-radius: 5px; }
+
+/* Tooltip */
+QToolTip { background-color: #ffffff; color: #111; border: 1px solid #cfd8e3; }
