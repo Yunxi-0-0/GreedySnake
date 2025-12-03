@@ -1,6 +1,6 @@
 #pragma once
 #include "GamePage.h"
-#include "qnamespace.h"
+#include "../component/GameOverDialog.h"
 
 GamePage::GamePage(QWidget *parent) : QWidget(parent){
     initUI();
@@ -15,6 +15,9 @@ void GamePage::initUI(){
     gameArea->setFixedSize(720,480);
     gameArea->move(0,120);
 
+    gameOverDialog = new GameOverDialog(this);
+    gameOverDialog->setWindowModality(Qt::WindowModal);
+    gameOverDialog->setWindowTitle("Game Over");
 }
 
 void GamePage::initConnect(){
@@ -25,6 +28,18 @@ void GamePage::initConnect(){
         gameArea->stop();
     });
     connect(gameArea, &GameArea::scoreChanged, upBar, &UpBar::changeScore);
-
+    connect(gameArea, &GameArea::gameOver, this, [this](){
+        gameOverDialog->show();
+    });
+    connect(gameOverDialog, &GameOverDialog::restartGame, gameArea, &GameArea::restart);
+    connect(gameOverDialog, &GameOverDialog::exitGame, gameArea, &GameArea::exitGame);
+    connect(gameOverDialog, &GameOverDialog::exitGame, this, [this](){
+        emit exitGame();
+        gameArea->restart();
+    });
 }
 
+void GamePage::reset(){
+    // gameArea->restart();
+    
+}

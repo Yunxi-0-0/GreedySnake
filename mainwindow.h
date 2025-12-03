@@ -23,6 +23,8 @@ private:
 
     QStackedWidget* stackedWidget;
 
+    int FPS = 100;
+
     void initUI();
     void initConnections();
     void applyTheme(QString theme);

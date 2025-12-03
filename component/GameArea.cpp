@@ -1,12 +1,12 @@
 #include "GameArea.h"
-#include "gameOverDialog.h"
+#include "GameOverDialog.h"
 #include "qnamespace.h"
 #include <QPaintEvent>
 #include <QKeyEvent>
 #include <QMessagebox>
 
 GameArea::GameArea(QWidget *parent) : QWidget(parent){
-    snake = new Snake();
+    snake = new Snake(10,500,FPS);
     // 允许接收键盘事件
     setFocusPolicy(Qt::StrongFocus);
     timer = new QTimer(this);
@@ -19,15 +19,13 @@ GameArea::GameArea(QWidget *parent) : QWidget(parent){
     });
     connect(this, &GameArea::gameOver, this, [this](){
         stop();
-        gameOverDialog = new GameOverDialog();
-        gameOverDialog->setWindowTitle("Game Over");
-        gameOverDialog->exec();
-
     });
+
+
 }
 
 void GameArea::start() {
-    timer->start(100);
+    timer->start(1000 / FPS);
     is_Running = true;
     setFocus();
 }
@@ -60,6 +58,7 @@ void GameArea::paintEvent(QPaintEvent *event) {
         painter.setBrush(Qt::red);
         painter.setPen(Qt::NoPen);
         painter.drawEllipse(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height());
+
     }
 
     // 吃到食物后，生成新的食物
@@ -121,15 +120,10 @@ bool GameArea::isRunning() const {
 
 void GameArea::generateFood(){
     if(food == nullptr){
-    food = new Food();
+        food = new Food();
+    }
     food->generate();
     is_Food_Generated = true;
-    }else{
-        delete food;
-        food = new Food();
-        food->generate();
-        is_Food_Generated = true;
-    }
 
 }
 
@@ -158,4 +152,13 @@ bool GameArea::checkCollision(Snake *snake){
         }
     }
     return is_Collision;
+}
+
+void GameArea::restart() {
+    snake->reGenerate();
+    generateFood();
+}
+
+void GameArea::exitGame(){
+    snake->reGenerate();
 }

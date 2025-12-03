@@ -39,7 +39,7 @@ void StartPage::initConnections(){
         emit StartPageStart();
     });
     connect(settingsButton, &QPushButton::clicked, this, [this](){
-        emit StartPageSettings();
+        emit StartPageSettings();     
     });
     connect(exitButton, &QPushButton::clicked, this, [this](){
         emit StartPageExit();

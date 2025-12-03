@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "page/GamePage.h"
+#include "page/StartPage.h"
 #include <QFile>
 #include <QCoreApplication>
 #include <QDir>
@@ -41,7 +43,12 @@ void MainWindow::initUI(){
 void MainWindow::initConnections(){
     connect(startPage, &StartPage::StartPageStart, this, [=](){
         stackedWidget->setCurrentWidget(gamePage);
+        // gamePage->reset();
     });
+    connect(gamePage, &GamePage::exitGame, this, [this](){
+        stackedWidget->setCurrentWidget(startPage);
+    });
+    connect(startPage, &StartPage::StartPageExit, this, &QApplication::quit);
 }
 
 void MainWindow::applyTheme(QString theme){

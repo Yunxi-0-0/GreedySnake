@@ -24,23 +24,21 @@ protected:
 private:
     Snake *snake;
     QTimer *timer;
+    int FPS = 100;
     bool is_Running = false;
     bool is_Food_Generated = false;
     Food *food;
-    GameOverDialog *gameOverDialog;
-
 
     void generateFood();
-
     bool checkEatFood(Snake *snake, Food *food);
-
     bool checkCollision(Snake *snake);
 
-
-
 public slots:
+    void restart();
+    void exitGame();
 
 signals:
     void scoreChanged(int score);
     void gameOver();
+
 };

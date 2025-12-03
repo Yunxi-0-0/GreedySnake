@@ -1,31 +1,21 @@
 #include "snake.h"
 #include "qgraphicsitem.h"
 #include "qpoint.h"
+#include "qtmetamacros.h"
 
 Snake::Snake()
 {
-    head = QPoint(360, 240);
-    body.append(head);
-    // 将初始身体放在头部的后方，避免第一次移动时重叠
-    switch (direction) {
-    case UP:
-        body.append(head + QPoint(0, size));
-        body.append(head + QPoint(0, 2 * size));
-        break;
-    case DOWN:
-        body.append(head + QPoint(0, -size));
-        body.append(head + QPoint(0, -2 * size));
-        break;
-    case LEFT:
-        body.append(head + QPoint(size, 0));
-        body.append(head + QPoint(2 * size, 0));
-        break;
-    case RIGHT:
-        body.append(head + QPoint(-size, 0));
-        body.append(head + QPoint(-2 * size, 0));
-        break;
-    }
+    generate();
 
+}
+
+Snake::Snake(int size, int speed, int FPS){
+    this->size = size;
+    this->speed = speed;
+    this->FPS = FPS;
+    this->stepLength = speed / FPS;
+    this->score = 0;
+    generate();
 }
 
 QVector<QPoint> Snake::getBody() const
@@ -53,22 +43,22 @@ int Snake::getSize() const
 void Snake::move(){
     switch (direction) {
     case UP:
-        body.insert(0, {head.x(), head.y() - speed});
+        body.insert(0, {head.x(), head.y() - stepLength});
         body.remove(body.size() - 1);
         head = body.first();
         break;
     case DOWN:
-        body.insert(0, {head.x(), head.y() + speed});
+        body.insert(0, {head.x(), head.y() + stepLength});
         body.remove(body.size() - 1);
         head = body.first();
         break;
     case LEFT:
-        body.insert(0, {head.x() - speed, head.y()});
+        body.insert(0, {head.x() - stepLength, head.y()});
         body.remove(body.size() - 1);
         head = body.first();
         break;
     case RIGHT:
-        body.insert(0, {head.x() + speed, head.y()});
+        body.insert(0, {head.x() + stepLength, head.y()});
         body.remove(body.size() - 1);
         head = body.first();
         break;
@@ -96,16 +86,57 @@ void Snake::grow()
 {
     switch (direction) {
     case UP:
-        body.append(body.last() + QPoint(0, size));
+        for(int i = 0; i < 10 / stepLength; i++){
+            body.append(body.last() + QPoint(0, stepLength));
+        }
         break;
     case DOWN:
-        body.append(body.last() + QPoint(0, -size));
-        break;
-    case LEFT:
-        body.append(body.last() + QPoint(size, 0));
+        for(int i = 0; i < 10 / stepLength; i++){
+            body.append(body.last() + QPoint(0, -stepLength));
+        }
         break;
     case RIGHT:
-        body.append(body.last() + QPoint(-size, 0));
+        for(int i = 0; i < 10 / stepLength; i++){
+            body.append(body.last() + QPoint(-stepLength, 0));
+        }
+        break;
+    case LEFT:
+        for(int i = 0; i < 10 / stepLength; i++){
+            body.append(body.last() + QPoint(stepLength, 0));
+        }
         break;
     }
+    
+}
+
+void Snake::generate(){
+
+    direction = UP;
+    head = QPoint(360, 240);
+    body.append(head);
+    // 将初始身体放在头部的后方，避免第一次移动时重叠
+    for(int i = 1; i < 50 / stepLength; i++){
+        body.append(body.last() + QPoint(0, +stepLength));
+    }
+    
+}
+
+void Snake::reGenerate(){
+    body.clear();
+    score = 0;
+    emit scoreChanged(score);
+    generate();
+}
+
+int Snake::getSpeed() const{
+    return speed;
+}
+
+void Snake::setSpeed(int speed){
+    this->speed = speed;
+    this->stepLength = speed / FPS;
+}
+
+int Snake::getTotalLength() const{
+    return stepLength * body.size();
 }

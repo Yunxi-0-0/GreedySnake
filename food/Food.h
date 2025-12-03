@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QPoint>
 #include <QSize>
+#include <QRandomGenerator>
 
 class Food : public QObject
 {
