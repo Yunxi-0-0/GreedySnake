@@ -61,6 +61,9 @@ void MainWindow::initConnections(){
     connect(middlePage, &MiddlePage::startGame, this, [=](){
         stackedWidget->setCurrentWidget(gamePage);
     });
+    connect(middlePage, &MiddlePage::exitGame, this, [=](){
+        stackedWidget->setCurrentWidget(startPage);
+    });
     connect(gamePage, &GamePage::exitGame, this, [this](){
         stackedWidget->setCurrentWidget(startPage);
     });

@@ -155,7 +155,9 @@ void MiddlePage::initConnections(){
         }else{
             QMessageBox::warning(this, "Warning", "Please select at least one player");
         }
-
+    });
+    connect(exitButton, &QPushButton::clicked, this, [this](){
+        emit exitGame();
     });
     connect(colourMenu1, &QMenu::triggered, this, &MiddlePage::MiddlePage::changePlayerColour1);
     connect(colourMenu2, &QMenu::triggered, this, &MiddlePage::MiddlePage::changePlayerColour2);

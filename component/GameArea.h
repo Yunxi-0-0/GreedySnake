@@ -35,6 +35,8 @@ private:
     void generateFood();
     bool checkEatFood(Snake *snake, Food *food);
     bool checkCollision(Snake *snake);
+    void printSnake(QPainter &painter, Snake *snake);
+    void controlSnake(QKeyEvent *event, Snake *snake, Snake::Control control);
 
 public slots:
     void restart();

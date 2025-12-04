@@ -12,8 +12,11 @@ public:
     Snake();
     Snake(int size, int speed, int FPS);
     Snake(int size, int speed, int FPS, bool isAi, QPoint initialPosition);
+    // Snake(int size, int speed, int FPS, Snake::Controller controller, QPoint initialPosition);
     enum  Direction { UP, DOWN, LEFT, RIGHT };
     enum  Colour { RED, GREEN, BLUE, YELLOW, BLACK, MAGENTA };
+    enum  Control { WASD, IJKL , COMMON};
+    enum  Controller { ENABLED, DISABLED ,AI};
     void setDirection( Direction direction);
     Direction getDirection() const;
     QPoint getHead() const;
@@ -29,6 +32,8 @@ public:
     void setAi(bool isAi);
     bool IsEnabled() const;
     void setEnabled(bool enabled);
+    void setController(Controller controller);
+    Controller getController() const;
     QString getName() const;
     void setName(QString name);
     void move();
@@ -43,6 +48,8 @@ private:
     QVector<QPoint> body;
     Direction direction = UP;
     Colour colour = GREEN;
+    Control control = COMMON;
+    Controller controller = DISABLED;
     QPoint head;
     int speed = 100;
     int size = 10;

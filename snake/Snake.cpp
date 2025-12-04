@@ -28,6 +28,26 @@ Snake::Snake(int size, int speed, int FPS, bool isAi, QPoint initialPosition){
     generate(initialPosition);
 }
 
+// Snake::Snake(int size, int speed, int FPS, Snake::Controller controller, QPoint initialPosition){
+//     this->size = size;
+//     this->speed = speed;
+//     this->FPS = FPS;
+//     this->stepLength = speed / FPS;
+//     this->score = 0;
+//     this->controller = controller;
+//     if(controller == Snake::AI){
+//         this->isAi = true;
+//         this->setEnabled(true);
+//     }else if(controller == Snake::ENABLED){
+//         this->isAi = false;
+//         this->setEnabled(true);
+//     }else{
+//         this->isAi = false;
+//         this->setEnabled(false);
+//     }
+//     generate(initialPosition);
+// }
+
 QVector<QPoint> Snake::getBody() const
 {
     return body;
@@ -195,4 +215,22 @@ QString Snake::getName() const{
 
 void Snake::setName(QString name){
     this->name = name;
+}
+
+void Snake::setController(Controller controller){
+    this->controller = controller;
+    if(controller == Snake::AI){
+        this->isAi = true;
+        this->setEnabled(true);
+    }else if(controller == Snake::ENABLED){
+        this->isAi = false;
+        this->setEnabled(true);
+    }else{
+        this->isAi = false;
+        this->setEnabled(false);
+    }
+}
+
+Snake::Controller Snake::getController() const{
+    return controller;
 }

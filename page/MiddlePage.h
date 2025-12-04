@@ -66,6 +66,7 @@ private:
 
 signals:
     void startGame();
+    void exitGame();
 public slots:
     void changePlayerColour1(QAction *action);
     void changePlayerColour2(QAction *action);
