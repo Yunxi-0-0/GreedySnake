@@ -1,5 +1,4 @@
 #include "GameArea.h"
-#include "GameOverDialog.h"
 #include "qevent.h"
 #include "qnamespace.h"
 #include "qpainter.h"
@@ -11,13 +10,14 @@
 #include <qaction.h>
 
 GameArea::GameArea(QWidget *parent) : QWidget(parent){
-    snake = new Snake(10,100,FPS,true,false,QPoint(180,240));
-    snake2 = new Snake(10,100,FPS,false,false,QPoint(360,240));
-    snake3 = new Snake(10,100,FPS,false,false,QPoint(540,240));
+    snake = new Snake(10,this->speed,FPS,true,false,QPoint(180,240));
+    snake2 = new Snake(10,this->speed,FPS,false,false,QPoint(360,240));
+    snake3 = new Snake(10,this->speed,FPS,false,false,QPoint(540,240));
 
     // 允许接收键盘事件
     setFocusPolicy(Qt::StrongFocus);
     timer = new QTimer(this);
+    foodTimer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this](){
         if(snake->IsEnabled()&&snake->IsAlive()){
             snake->move();
@@ -30,6 +30,9 @@ GameArea::GameArea(QWidget *parent) : QWidget(parent){
         }
         update();
     });
+    connect(foodTimer, &QTimer::timeout, this, [this](){
+        addFood();
+    });
     connect(snake, &Snake::scoreChanged, this, [this](int score){
         emit scoreChanged(score);
     });
@@ -41,12 +44,14 @@ GameArea::GameArea(QWidget *parent) : QWidget(parent){
 
 void GameArea::start() {
     timer->start(1000 / FPS);
+    foodTimer->start(10000);
     is_Running = true;
     setFocus();
 }
 
 void GameArea::stop() {
     timer->stop();
+    foodTimer->stop();
     is_Running = false;
 }
 
@@ -55,28 +60,104 @@ void GameArea::paintEvent(QPaintEvent *event) {
     // 绘制背景
     painter.fillRect(rect(), Qt::white);
 
+    // 绘制食物
+    if(!is_Food_Generated){
+        food = new Food();
+        food->generate();
+        painter.setBrush(Qt::red);
+        painter.setPen(Qt::NoPen);
+        painter.drawPixmap(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height(), food->getFoodPixmap());
+        is_Food_Generated = true;
+    }else{
+        painter.setBrush(Qt::red);
+        painter.setPen(Qt::NoPen);
+        painter.drawPixmap(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height(), food->getFoodPixmap());
+    }
+
+    for(auto food : foods){
+        printFood(painter, food);
+    }
+
     // 绘制蛇
     printSnake(painter, snake);
     printSnake(painter, snake2);
     printSnake(painter, snake3);
 
+    // 全部检测
+    totalCheck();
 
-    // 绘制食物
-    if(!is_Food_Generated){
+}
+
+
+
+void GameArea::keyPressEvent(QKeyEvent *event) {
+    controlSnake(event, snake, Snake::WASD);
+    controlSnake(event, snake2, Snake::IJKL);
+    controlSnake(event, snake3, Snake::COMMON);
+    control(event);
+
+}
+
+bool GameArea::isRunning() const {
+    return is_Running;
+}
+
+int GameArea::getSnakeNumber() const {
+    int number = 0;
+    if(snake->IsAlive()){
+        number++;
+    }
+    if(snake2->IsAlive()){
+        number++;
+    }
+    if(snake3->IsAlive()){
+        number++;
+    }
+    return number;
+}
+
+void GameArea::generateFood(){
+    if(food == nullptr){
         food = new Food();
-        food->generate();
+    }
+    food->generate();
+    is_Food_Generated = true;
+    for(auto food : foods){
+        if(!food->IsGenerated()){
+            food->generate();
+        }
+    }
+}
 
-        painter.setBrush(Qt::red);
-        painter.setPen(Qt::NoPen);
-        painter.drawEllipse(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height());
-        is_Food_Generated = true;
-    }else{
-        painter.setBrush(Qt::red);
-        painter.setPen(Qt::NoPen);
-        painter.drawEllipse(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height());
+void GameArea::generateFood(Food *food){
+    if(food == nullptr){
+        food = new Food();
+    }
+    food->generate();
+    food->setIsGenerated(true);
+}
 
+void GameArea::addFood(){
+    if(foods.size()+1 >= foodLimit){
+        return;
+    }
+    Food *food = new Food();
+    foods.append(food);
+    food->generate();
+}
+
+void GameArea::removeFood(Food *food){
+    stop();
+    if(food == nullptr){
+        return;
     }
 
+    delete food;
+    foods.removeOne(food);
+    start();
+}
+
+void GameArea::totalCheck(){
     // 吃到食物后，生成新的食物
     if(checkEatFood(snake, food)){
         is_Food_Generated = false;
@@ -95,6 +176,10 @@ void GameArea::paintEvent(QPaintEvent *event) {
         snake3->eat(food);
         generateFood();
     }
+
+    checkEatFood(snake, foods);
+    checkEatFood(snake2, foods);
+    checkEatFood(snake3, foods);
 
     // 检测碰撞
     if(checkCollision(snake)){
@@ -124,57 +209,27 @@ void GameArea::paintEvent(QPaintEvent *event) {
     if(checkCollisionBetweenSnakes(snake3, snake2)){
         emit snakeCollided(snake3);
     }
-    if(getSnakeNumber() == 0){
+    if(!snake->IsAlive()&&!snake2->IsAlive()&&!snake3->IsAlive()){
         emit gameOver();
     }
-
-}
-
-
-
-void GameArea::keyPressEvent(QKeyEvent *event) {
-    controlSnake(event, snake, Snake::WASD);
-    controlSnake(event, snake2, Snake::IJKL);
-    controlSnake(event, snake3, Snake::COMMON);
-
-}
-
-bool GameArea::isRunning() const {
-    return is_Running;
-}
-
-int GameArea::getSnakeNumber() const {
-    int number = 0;
-    if(snake->IsAlive()){
-        number++;
-    }
-    if(snake2->IsAlive()){
-        number++;
-    }
-    if(snake3->IsAlive()){
-        number++;
-    }
-    return number;
-}
-
-void GameArea::generateFood(){
-    if(food == nullptr){
-        food = new Food();
-    }
-    food->generate();
-    is_Food_Generated = true;
-
 }
 
 bool GameArea::checkEatFood(Snake *snake, Food *food){
     bool is_Eat = false;
-    if(food->getX() <= snake->getHead().x() +snake->getSize()/2 
-    && food->getX() >= snake->getHead().x() - snake->getSize()/2 
-    && food->getY() <= snake->getHead().y() +snake->getSize()/2 
-    && food->getY() >= snake->getHead().y() - snake->getSize()/2){
+    double distance = sqrt(pow(food->getX() - snake->getHead().x(), 2) + pow(food->getY() - snake->getHead().y(), 2));
+    if(distance < (snake->getSize() + food->getSize().width()/2)*0.8){
         is_Eat = true;
     }
     return is_Eat;
+}
+
+void GameArea::checkEatFood(Snake *snake, QVector<Food *> foods){
+    for(auto food : foods){
+        if(checkEatFood(snake, food)){
+            snake->eat(food);
+            food->generate();
+        }
+    }
 }
 
 bool GameArea::checkCollision(Snake *snake){
@@ -194,6 +249,9 @@ bool GameArea::checkCollision(Snake *snake){
 }
 
 bool GameArea::checkCollisionBetweenSnakes(Snake *snake1, Snake *snake2){
+    if(!snake2->IsAlive()){
+        return false;
+    }
     bool is_Collision = false;
     for(int i = 1; i < snake2->getBody().size(); i++){
         if(snake1->getHead() == snake2->getBody()[i]){
@@ -238,10 +296,29 @@ void GameArea::printSnake(QPainter &painter, Snake *snake){
     }
 }
 
+void GameArea::printFood(QPainter &painter, Food *food){
+    if(!is_Food_Generated){
+        food = new Food();
+        food->generate();
+        painter.setBrush(Qt::red);
+        painter.setPen(Qt::NoPen);
+        painter.drawPixmap(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height(), food->getFoodPixmap());
+        is_Food_Generated = true;
+    }else{
+        painter.setBrush(Qt::red);
+        painter.setPen(Qt::NoPen);
+        painter.drawPixmap(food->getX() - food->getSize().width()/2, food->getY() - food->getSize().height()/2, food->getSize().width(), food->getSize().height(), food->getFoodPixmap());
+
+    }
+}
+
 void GameArea::restart() {
     snake->reGenerate();
     snake2->reGenerate();
     snake3->reGenerate();
+    for(auto food : foods){
+        removeFood(food);
+    }
     generateFood();
 }
 
@@ -276,13 +353,6 @@ void GameArea::controlSnake(QKeyEvent *event, Snake *snake, Snake::Control contr
                 break;
             }
             snake->setDirection(Snake::RIGHT);
-            break;
-        case Qt::Key_Space:
-             if(isRunning()){
-                 stop();
-             }else if(!isRunning()){
-                 start();
-             }
             break;
         default:
             break;
@@ -345,6 +415,43 @@ void GameArea::controlSnake(QKeyEvent *event, Snake *snake, Snake::Control contr
             }
         }
     }
+}
+
+void GameArea::control(QKeyEvent *event){
+    switch (event->key()) {
+    case Qt::Key_Escape:
+        stop();
+        exitGame();
+        break;
+    case Qt::Key_R:
+        stop();
+        restart();
+        break;
+    case Qt::Key_Space:
+        if(isRunning()){
+            stop();
+        }else if(!isRunning()){
+            start();
+        }
+         break;
+    case Qt::Key_F1:
+        this->FPS *= 2;
+        this->timer->setInterval(1000 / this->FPS);
+        snake->setFPS(this->FPS);
+        snake2->setFPS(this->FPS);
+        snake3->setFPS(this->FPS);
+        break;
+    case Qt::Key_F2:
+        this->FPS /= 2;
+        this->timer->setInterval(1000 / this->FPS);
+        snake->setFPS(this->FPS);
+        snake2->setFPS(this->FPS);
+        snake3->setFPS(this->FPS);
+        break;
+    default:
+        break;
+    }
+
 }
 
 void GameArea::setSnakeColour(int Player, Snake::Colour colour){

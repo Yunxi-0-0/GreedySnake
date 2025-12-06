@@ -1,4 +1,5 @@
 #pragma once
+
 #include "GamePage.h"
 #include "../component/GameOverDialog.h"
 #include <qaction.h>

@@ -7,6 +7,7 @@
 #include <qaction.h>
 #include "../food/Food.h"
 #include "GameOverDialog.h"
+#include "qtimer.h"
 
 
 class GameArea : public QWidget
@@ -30,17 +31,28 @@ private:
     Snake *snake3;
     
     QTimer *timer;
+    QTimer *foodTimer;
     int FPS = 100;
     bool is_Running = false;
     bool is_Food_Generated = false;
     Food *food;
+    QVector<Food *> foods = {};
+    int foodLimit = 10;
+    int speed = 100;
 
     void generateFood();
+    void generateFood(Food *food);
+    void addFood();
+    void removeFood(Food *food);
+    void totalCheck();
     bool checkEatFood(Snake *snake, Food *food);
+    void checkEatFood(Snake *snake, QVector<Food *> foods);
     bool checkCollision(Snake *snake);
     bool checkCollisionBetweenSnakes(Snake *snake1, Snake *snake2);
     void printSnake(QPainter &painter, Snake *snake);
+    void printFood(QPainter &painter, Food *food);
     void controlSnake(QKeyEvent *event, Snake *snake, Snake::Control control);
+    void control(QKeyEvent *event);
 
 public slots:
     void restart();

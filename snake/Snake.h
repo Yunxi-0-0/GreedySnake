@@ -25,6 +25,9 @@ public:
     int getSize() const;
     int getSpeed() const;
     void setSpeed(int speed);
+    int getFPS() const;
+    void setFPS(int FPS);
+    int getStepLength() const;
     int getTotalLength() const;
     Colour getColour() const;
     void setColour(Colour colour);

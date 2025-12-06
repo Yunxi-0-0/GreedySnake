@@ -13,7 +13,6 @@ Snake::Snake(int size, int speed, int FPS){
     this->size = size;
     this->speed = speed;
     this->FPS = FPS;
-    this->stepLength = speed / FPS;
     this->score = 0;
     generate();
 }
@@ -22,23 +21,20 @@ Snake::Snake(int size, int speed, int FPS,bool isEnabled, bool isAi, QPoint init
     this->size = size;
     this->speed = speed;
     this->FPS = FPS;
-    this->stepLength = speed / FPS;
     this->score = 0;
-    if(isEnabled){
-        this->setEnabled(true);
-        if(isAi){
-            this->isAi = true;
-        }else{
-            this->isAi = false;
-        }
+    this->initialPosition = initialPosition;
+    if(isEnabled&&!isAi){
+        this->setController(Snake::ENABLED);
+    }else if(isEnabled&&isAi){
+        this->setController(Snake::AI);
+    }else if(!isEnabled&&!isAi){
+        this->setController(Snake::DISABLED);
     }else{
-        this->isAlive = false;
-        this->isAi = false;
-        this->setEnabled(false);
+        this->setController(Snake::DISABLED);
     }
-    this->initialPosition.setX(initialPosition.x());
-    this->initialPosition.setY(initialPosition.y());
-    generate(initialPosition);
+
+    this->generate(initialPosition);
+
 }
 
 
@@ -68,22 +64,22 @@ int Snake::getSize() const
 void Snake::move(){
     switch (direction) {
     case UP:
-        body.insert(0, {head.x(), head.y() - stepLength});
+        body.insert(0, {head.x(), head.y() - speed/100});
         body.remove(body.size() - 1);
         head = body.first();
         break;
     case DOWN:
-        body.insert(0, {head.x(), head.y() + stepLength});
+        body.insert(0, {head.x(), head.y() + speed/100});
         body.remove(body.size() - 1);
         head = body.first();
         break;
     case LEFT:
-        body.insert(0, {head.x() - stepLength, head.y()});
+        body.insert(0, {head.x() - speed/100, head.y()});
         body.remove(body.size() - 1);
         head = body.first();
         break;
     case RIGHT:
-        body.insert(0, {head.x() + stepLength, head.y()});
+        body.insert(0, {head.x() + speed/100, head.y()});
         body.remove(body.size() - 1);
         head = body.first();
         break;
@@ -137,7 +133,10 @@ void Snake::grow()
 void Snake::generate(){
 
     direction = UP;
-    head = QPoint(360, 240);
+    if(initialPosition.isNull()){
+        initialPosition = QPoint(360, 240);
+    }
+    head = initialPosition;
     body.append(head);
     // 将初始身体放在头部的后方，避免第一次移动时重叠
     for(int i = 1; i < 50 / stepLength; i++){
@@ -154,10 +153,15 @@ void Snake::generate(QPoint initialPosition){
     for(int i = 1; i < 50 / stepLength; i++){
         body.append(body.last() + QPoint(0, +stepLength));
     }
-    this->setAlive(true);
+    if(controller != Snake::DISABLED){
+        this->isAlive = true;
+    }
 }
 
 void Snake::reGenerate(){
+    if(!isEnabled){
+        return;
+    }
     body.clear();
     score = 0;
     emit scoreChanged(score);
@@ -170,7 +174,18 @@ int Snake::getSpeed() const{
 
 void Snake::setSpeed(int speed){
     this->speed = speed;
-    this->stepLength = speed / FPS;
+}
+
+int Snake::getFPS() const{
+    return FPS;
+}
+
+void Snake::setFPS(int FPS){
+    this->FPS = FPS;
+}
+
+int Snake::getStepLength() const{
+    return stepLength;
 }
 
 int Snake::getTotalLength() const{
@@ -191,7 +206,6 @@ bool Snake::IsEnabled() const{
 
 void Snake::setEnabled(bool enabled){
     isEnabled = enabled;
-    setAlive(enabled);
 }
 
 bool Snake::IsAi() const{
@@ -223,17 +237,20 @@ void Snake::setName(QString name){
 }
 
 void Snake::setController(Controller controller){
-    this->controller = controller;
     if(controller == Snake::AI){
         this->isAi = true;
         this->setEnabled(true);
+        this->isAlive = true;
     }else if(controller == Snake::ENABLED){
         this->isAi = false;
         this->setEnabled(true);
-    }else{
+        this->isAlive = true;
+    }else if(controller == Snake::DISABLED){
         this->isAi = false;
         this->setEnabled(false);
-    }
+        this->isAlive = false;
+    }      
+    this->controller = controller;
 }
 
 Snake::Controller Snake::getController() const{
