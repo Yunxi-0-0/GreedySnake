@@ -63,6 +63,7 @@ GameArea::GameArea(QWidget *parent) : QWidget(parent){
     });
     connect(this, &GameArea::gameOver, this, [this](){
         stop();
+
     });
     connect(this, &GameArea::snakeCollided, this, &GameArea::snakeDied);
 }
@@ -491,6 +492,12 @@ QVector<QPoint> GameArea::getObstacles() const {
         obstacles.append(snake3->getBody());
     }
     return obstacles;
+}
+
+void GameArea::backEnd(){
+    emit backEndSnakeScore(snake);
+    emit backEndSnakeScore(snake2);
+    emit backEndSnakeScore(snake3);
 }
 
 

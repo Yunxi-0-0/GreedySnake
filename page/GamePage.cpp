@@ -40,6 +40,7 @@ void GamePage::initConnect(){
         gameArea->restart();
         gameArea->stop();
     });
+    connect(gameArea, &GameArea::backEndSnakeScore, this, &GamePage::backEndScore);
 }
 
 void GamePage::reset(){
@@ -75,4 +76,8 @@ void GamePage::setPlayerController(int player, QAction *action){
         controller = Snake::AI;
     }
     gameArea->setSnakeController(player, controller);
+}
+
+void GamePage::backEndScore(Snake *snake){
+    emit updateScoreRankings(snake->getName(), snake->getScore());
 }

@@ -54,6 +54,7 @@ private:
     void controlSnake(QKeyEvent *event, Snake *snake, Snake::Control control);
     void control(QKeyEvent *event);
     QVector<QPoint> getObstacles() const;
+    void backEnd();
 
 public slots:
     void restart();
@@ -66,5 +67,6 @@ signals:
     void scoreChanged(int score);
     void gameOver();
     void snakeCollided(Snake *snake);
+    void backEndSnakeScore(Snake *snake);
 
 };

@@ -22,6 +22,7 @@ private:
 
 signals:
     void exitGame();
+    void updateScoreRankings(QString playerName, int score);
 
 public:
     void startGame();
@@ -30,6 +31,7 @@ public slots:
     void reset();
     void setPlayerColour(int player, QAction *action);
     void setPlayerController(int player, QAction *action);
+    void backEndScore(Snake *snake);
 
 
 };
