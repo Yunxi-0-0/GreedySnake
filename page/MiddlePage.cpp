@@ -52,7 +52,9 @@ void MiddlePage::initUI()
 
     playerName1 = new QLineEdit(this);
     playerName2 = new QLineEdit(this);
+    playerName2->setReadOnly(true);
     playerName3 = new QLineEdit(this);
+    playerName3->setReadOnly(true);
 
     controlMenu1 = new QMenu(this);
     controlMenu1->addAction("Enabled");
@@ -164,6 +166,15 @@ void MiddlePage::initConnections(){
     connect(playerControl1, &QToolButton::triggered, this, &MiddlePage::MiddlePage::changePlayerControl1);
     connect(playerControl2, &QToolButton::triggered, this, &MiddlePage::MiddlePage::changePlayerControl2);
     connect(playerControl3, &QToolButton::triggered, this, &MiddlePage::MiddlePage::changePlayerControl3);
+    connect(playerName1, &QLineEdit::textChanged, this, [this](QString text){
+        emit changePlayerName(1, text);
+    });
+    connect(playerName2, &QLineEdit::textChanged, this, [this](QString text){
+        emit changePlayerName(2, text);
+    }); 
+    connect(playerName3, &QLineEdit::textChanged, this, [this](QString text){
+        emit changePlayerName(3, text);
+    }); 
 }
 
 void MiddlePage::changePlayerColour1(QAction *action){
@@ -217,12 +228,19 @@ void MiddlePage::changePlayerControl1(QAction *action){
     if(control == "Enabled"){
         playerImage1->setPixmap(QPixmap(getImagePath("green.jpg")));
         playerColour1->setText("Green");
+        playerName1->clear();
+        playerName1->setReadOnly(false);
     }else if(control == "Disabled"){
         playerImage1->setPixmap(QPixmap(getImagePath("notEnabled.jpg")));
         playerColour1->setText("colour");
+        playerName1->clear();
+        playerName1->setReadOnly(true);
     }else if(control == "AI"){
         playerImage1->setPixmap(QPixmap(getImagePath("green.jpg")));
         playerColour1->setText("Green");
+        playerName1->setText("AI");
+        playerName1->setReadOnly(true);
+        emit changePlayerName(1, "AI");
     }
     emit changePlayerController(1, action);
 }
@@ -233,12 +251,17 @@ void MiddlePage::changePlayerControl2(QAction *action){
     if(control == "Enabled"){
         playerImage2->setPixmap(QPixmap(getImagePath("green.jpg")));
         playerColour2->setText("Green");
+        playerName2->setReadOnly(false);
     }else if(control == "Disabled"){
         playerImage2->setPixmap(QPixmap(getImagePath("notEnabled.jpg")));
         playerColour2->setText("colour");
+        playerName2->setReadOnly(true);
     }else if(control == "AI"){
         playerImage2->setPixmap(QPixmap(getImagePath("green.jpg")));
         playerColour2->setText("Green");
+        playerName2->setText("AI");
+        playerName2->setReadOnly(true);
+        emit changePlayerName(2, "AI");
     }
     emit changePlayerController(2, action);
 }
@@ -249,12 +272,17 @@ void MiddlePage::changePlayerControl3(QAction *action){
     if(control == "Enabled"){
         playerImage3->setPixmap(QPixmap(getImagePath("green.jpg")));
         playerColour3->setText("Green");
+        playerName3->setReadOnly(false);
     }else if(control == "Disabled"){
         playerImage3->setPixmap(QPixmap(getImagePath("notEnabled.jpg")));
         playerColour3->setText("colour");
+        playerName3->setReadOnly(true);
     }else if(control == "AI"){
         playerImage3->setPixmap(QPixmap(getImagePath("green.jpg")));
         playerColour3->setText("Green");
+        playerName3->setText("AI");
+        playerName3->setReadOnly(true);
+        emit changePlayerName(3, "AI");
     }
     emit changePlayerController(3, action);
 }
@@ -271,4 +299,21 @@ int MiddlePage::getPlayerNumber(){
         playerNumber++;
     }
     return playerNumber;
+}
+
+void MiddlePage::changeLanguage(QString language){
+    if(language == "en"){
+        this->player1->setText("Player 1:");
+        this->player2->setText("Player 2:");
+        this->player3->setText("Player 3:");
+        this->startButton->setText("Start Game");
+        this->exitButton->setText("Exit");
+
+    }else if(language == "zh"){
+        this->player1->setText("玩家1:");
+        this->player2->setText("玩家2:");
+        this->player3->setText("玩家3:");
+        this->startButton->setText("开始游戏");
+        this->exitButton->setText("退出游戏");
+    }
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "qboxlayout.h"
+#include "qobject.h"
 #include "qpushbutton.h"
 #include <QWidget>
 #include <QLayout>
@@ -23,8 +24,8 @@ private:
     void initUI();
     void initConnections();
 
-private slots:
-
+public slots:
+    void changeLanguage(QString language);
 signals:
     void StartPageStart();
     void StartPageSettings();

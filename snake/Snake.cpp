@@ -416,6 +416,10 @@ void Snake::setName(QString name){
     this->name = name;
 }
 
+void Snake::setDifficulty(int difficulty){
+    this->difficulty = difficulty;
+}
+
 void Snake::setController(Controller controller){
     if(controller == Snake::AI){
         this->isAi = true;

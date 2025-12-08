@@ -4,6 +4,7 @@
 #include "qlabel.h"
 #include "qlineedit.h"
 #include "qmenu.h"
+#include "qobject.h"
 #include "qtoolbutton.h"
 #include <QWidget>
 #include <QPushButton>
@@ -78,5 +79,7 @@ public slots:
     void changePlayerControl1(QAction *action);
     void changePlayerControl2(QAction *action);
     void changePlayerControl3(QAction *action);
+    void changeLanguage(QString language);
+
     
 };

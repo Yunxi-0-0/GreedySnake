@@ -9,16 +9,34 @@
 #include <QKeyEvent>
 #include <QMessagebox>
 #include <qaction.h>
+#include "../tools/Tools.h"
 
 GameArea::GameArea(QWidget *parent) : QWidget(parent){
     snake = new Snake(10,this->speed,FPS,true,false,QPoint(180,240));
     snake2 = new Snake(10,this->speed,FPS,false,false,QPoint(360,240));
     snake3 = new Snake(10,this->speed,FPS,false,false,QPoint(540,240));
 
+    diedAudioOutput = new QAudioOutput(this);
+    diedAudioOutput->setVolume(0.5);
+
+    diedMediaPlayer = new QMediaPlayer(this);
+    diedMediaPlayer->setAudioOutput(diedAudioOutput);
+    diedMediaPlayer->setSource(QUrl::fromLocalFile(getMusicPath("die.mp3")));
+
+    eatAudioOutput = new QAudioOutput(this);
+    eatAudioOutput->setVolume(0.5);
+
+    eatMediaPlayer = new QMediaPlayer(this);
+    eatMediaPlayer->setAudioOutput(eatAudioOutput);
+    eatMediaPlayer->setSource(QUrl::fromLocalFile(getMusicPath("eat.mp3")));
+    
+
     // 允许接收键盘事件
     setFocusPolicy(Qt::StrongFocus);
     timer = new QTimer(this);
     foodTimer = new QTimer(this);
+    landmineTimer = new QTimer(this);
+    Timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this](){
         if(snake->IsEnabled()&&snake->IsAlive()){
             if(snake->IsAi()){
@@ -58,19 +76,34 @@ GameArea::GameArea(QWidget *parent) : QWidget(parent){
     connect(foodTimer, &QTimer::timeout, this, [this](){
         addFood();
     });
+    connect(landmineTimer, &QTimer::timeout, this, [this](){
+        addLandmine();
+    });
+    connect(Timer, &QTimer::timeout, this, [this](){
+        emit addTime();
+    });
     connect(snake, &Snake::scoreChanged, this, [this](int score){
-        emit scoreChanged(score);
+        emit scoreChanged(1,score);
+    });
+    connect(snake2, &Snake::scoreChanged, this, [this](int score){
+        emit scoreChanged(2,score);
+    });
+    connect(snake3, &Snake::scoreChanged, this, [this](int score){
+        emit scoreChanged(3,score);
     });
     connect(this, &GameArea::gameOver, this, [this](){
         stop();
 
     });
     connect(this, &GameArea::snakeCollided, this, &GameArea::snakeDied);
+
 }
 
 void GameArea::start() {
     timer->start(1000 / FPS);
     foodTimer->start(10000);
+    landmineTimer->start(20000);
+    Timer->start(1000);
     is_Running = true;
     setFocus();
 }
@@ -78,6 +111,8 @@ void GameArea::start() {
 void GameArea::stop() {
     timer->stop();
     foodTimer->stop();
+    landmineTimer->stop();
+    Timer->stop();
     is_Running = false;
 }
 
@@ -102,6 +137,11 @@ void GameArea::paintEvent(QPaintEvent *event) {
 
     for(auto food : foods){
         printFood(painter, food);
+    }
+
+    //绘制地雷
+    for(auto landmine : landmines){
+        printLandmine(painter, landmine);
     }
 
     // 绘制蛇
@@ -172,6 +212,15 @@ void GameArea::addFood(){
     food->generate();
 }
 
+void GameArea::addLandmine(){
+    if(landmines.size() >= landmineLimit){
+        return;
+    }
+    Landmine *landmine = new Landmine();
+    landmines.append(landmine);
+    landmine->generate();
+}
+
 void GameArea::removeFood(Food *food){
     stop();
     if(food == nullptr){
@@ -183,29 +232,46 @@ void GameArea::removeFood(Food *food){
     start();
 }
 
+void GameArea::removeLandmine(Landmine *landmine){
+    stop();
+    if(landmine == nullptr){
+        return;
+    }
+    delete landmine;
+    landmines.removeOne(landmine);
+    start();
+}
+
 void GameArea::totalCheck(){
     // 吃到食物后，生成新的食物
    if(checkEatFood(snake, food)){
         is_Food_Generated = false;
         snake->eat( food);
         generateFood();
+        eatMediaPlayer->play();
     }
 
     if(checkEatFood(snake2, food)){
         is_Food_Generated = false;
         snake2->eat(food);
         generateFood();
+        eatMediaPlayer->play();
     }
 
     if(checkEatFood(snake3, food)){
         is_Food_Generated = false;
         snake3->eat(food);
         generateFood();
+        eatMediaPlayer->play();
     }
 
     checkEatFood(snake, foods);
     checkEatFood(snake2, foods);
     checkEatFood(snake3, foods);
+
+    checkEatLandmine(snake, landmines);
+    checkEatLandmine(snake2, landmines);
+    checkEatLandmine(snake3, landmines);
 
     // 检测碰撞
     if(checkCollision(snake)){
@@ -254,28 +320,52 @@ void GameArea::checkEatFood(Snake *snake, QVector<Food *> foods){
         if(checkEatFood(snake, food)){
             snake->eat(food);
             food->generate();
+            eatMediaPlayer->play();
+        }
+    }
+}
+
+bool GameArea::checkEatLandmine(Snake *snake, Landmine *landmine){
+    bool is_Eat = false;
+    double distance = sqrt(pow(landmine->getX() - snake->getHead().x(), 2) + pow(landmine->getY() - snake->getHead().y(), 2));
+    if(distance < (snake->getSize() + landmine->getSize().width()/2)*0.8){
+        is_Eat = true;
+    }
+    return is_Eat;
+}
+
+void GameArea::checkEatLandmine(Snake *snake, QVector<Landmine *> landmines){
+    for(auto landmine : landmines){
+        if(checkEatLandmine(snake, landmine)){
+            diedMediaPlayer->play();
+            emit snakeCollided(snake);
+            return;
         }
     }
 }
 
 bool GameArea::checkCollision(Snake *snake){
+    if(!snake->IsEnabled()||!snake->IsAlive()){
+        return false;
+    }
     bool is_Collision = false;
     // 检测碰撞边缘
     if(snake->getHead().x() < 0 || snake->getHead().x() > 719 || snake->getHead().y() < 0 || snake->getHead().y() > 479){
         is_Collision = true;
+        return is_Collision;
     }
     // 检测碰撞自己
     for(int i = 1; i < snake->getBody().size(); i++){
         if(snake->getHead() == snake->getBody()[i]){
             is_Collision = true;
-            break;
+            return is_Collision;
         }
     }
     return is_Collision;
 }
 
 bool GameArea::checkCollisionBetweenSnakes(Snake *snake1, Snake *snake2){
-    if(!snake2->IsAlive()){
+    if(!snake2->IsAlive()||!snake1->IsAlive()||!snake2->IsEnabled()||!snake1->IsEnabled()){
         return false;
     }
     bool is_Collision = false;
@@ -338,12 +428,23 @@ void GameArea::printFood(QPainter &painter, Food *food){
     }
 }
 
+void GameArea::printLandmine(QPainter &painter, Landmine *landmine){
+    if(landmine == nullptr){
+        return;
+    }
+    painter.setPen(Qt::NoPen);
+    painter.drawPixmap(landmine->getX() - landmine->getSize().width()/2, landmine->getY() - landmine->getSize().height()/2, landmine->getSize().width(), landmine->getSize().height(), landmine->getLandminePixmap());
+}
+
 void GameArea::restart() {
     snake->reGenerate();
     snake2->reGenerate();
     snake3->reGenerate();
     for(auto food : foods){
         removeFood(food);
+    }
+    for(auto landmine : landmines){
+        removeLandmine(landmine);
     }
     generateFood();
 }
@@ -491,6 +592,10 @@ QVector<QPoint> GameArea::getObstacles() const {
     if(snake3->IsEnabled()&&snake3->IsAlive()){
         obstacles.append(snake3->getBody());
     }
+    for(auto landmine : landmines){
+        QPoint landmine_(landmine->getX(), landmine->getY());
+        obstacles.append(landmine_);
+    }
     return obstacles;
 }
 
@@ -499,6 +604,21 @@ void GameArea::backEnd(){
     emit backEndSnakeScore(snake2);
     emit backEndSnakeScore(snake3);
 }
+
+QString GameArea::getPlayerName(int Player) const{
+    QString name;
+    if(Player == 1){
+        name = snake->getName();
+    }
+    if(Player == 2){
+        name = snake2->getName();
+    }
+    if(Player == 3){
+        name = snake3->getName();
+    }
+    return name;
+}
+
 
 
 
@@ -526,6 +646,40 @@ void GameArea::setSnakeController(int Player, Snake::Controller controller){
     }
 }
 
+void GameArea::setSnakeName(int Player, QString name){
+    if(Player == 1){
+        snake->setName(name);
+    }
+    if(Player == 2){
+        snake2->setName(name);
+    }
+    if(Player == 3){
+        snake3->setName(name);
+    }
+}
+
 void GameArea::snakeDied(Snake *snake){
     snake->setAlive(false);
+    this->diedMediaPlayer->play();
 }
+
+void GameArea::setDifficulty(int difficulty){
+    this->difficulty = difficulty;
+    if(difficulty == 1){
+        this->landmineLimit = 0;
+    }else if(difficulty == 2){
+        this->landmineLimit = 5;
+    }else {
+        this->landmineLimit = 25;
+    }
+}
+
+void GameArea::playDiedSound(){
+    diedMediaPlayer->play();
+}
+
+void GameArea::changeVolume(double volume){
+    this->eatAudioOutput->setVolume(volume);
+    this->diedAudioOutput->setVolume(volume);
+}
+

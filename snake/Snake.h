@@ -44,8 +44,9 @@ public:
     Controller getController() const;
     QString getName() const;
     void setName(QString name);
-    void move();
+    void setDifficulty(int difficulty);
 
+    void move();
     void eat(Food* food);
     void grow();
     void reGenerate();

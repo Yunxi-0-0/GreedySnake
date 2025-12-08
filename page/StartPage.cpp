@@ -52,3 +52,20 @@ void StartPage::initConnections(){
         emit StartPageExit();
     });
 }
+
+void StartPage::changeLanguage(QString language){
+    if(language == "en"){
+        titleLabel->setText("Greedy Snake");
+        startButton->setText("Start Game");
+        settingsButton->setText("Settings");
+        rankingButton->setText("Ranking");
+        exitButton->setText("Exit");
+    }
+    else if(language == "zh"){
+        titleLabel->setText("贪吃蛇");
+        startButton->setText("开始游戏");
+        settingsButton->setText("设置");
+        rankingButton->setText("排行榜");
+        exitButton->setText("退出");
+    }
+}

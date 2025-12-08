@@ -12,16 +12,16 @@ DifficultyPage::DifficultyPage(QWidget *parent) : QWidget(parent)
     this->setStyleSheet("background-color:black;");
 
     // 创建标题
-    QLabel *label = new QLabel("选择游戏难度", this);
+    label = new QLabel("please select difficulty", this);
     label->setGeometry(0, 100, 720, 50);
     label->setAlignment(Qt::AlignCenter);
     label->setStyleSheet("font-size: 24px; font-weight: bold;");
 
     // 创建按钮
-    QPushButton *btnEasy = new QPushButton("简单模式", this);
-    QPushButton *btnNormal = new QPushButton("普通模式", this);
-    QPushButton *btnHard = new QPushButton("困难模式", this);
-    QPushButton *btnBack = new QPushButton("返回主界面", this);
+    btnEasy = new QPushButton("easy mode", this);
+    btnNormal = new QPushButton("normal mode", this);
+    btnHard = new QPushButton("hard mode", this);
+    btnBack = new QPushButton("back", this);
 
     // 设置按钮位置
     btnEasy->setGeometry(260, 200, 200, 50);
@@ -38,17 +38,37 @@ DifficultyPage::DifficultyPage(QWidget *parent) : QWidget(parent)
     // 连接信号
     QObject::connect(btnEasy, &QPushButton::clicked, this, [=](){
         emit difficultySelected(1);
+        emit startGame();
     });
 
     QObject::connect(btnNormal, &QPushButton::clicked, this, [=](){
         emit difficultySelected(2);
+        emit startGame();
     });
 
     QObject::connect(btnHard, &QPushButton::clicked, this, [=](){
         emit difficultySelected(3);
+        emit startGame();
     });
 
     QObject::connect(btnBack, &QPushButton::clicked, this, [=](){
         emit backButtonClicked();
     });
+
+}
+
+void DifficultyPage::changeLanguage(const QString language){
+    if(language == "zh"){
+        this->label->setText("请选择难度");
+        btnEasy->setText("简单模式");
+        btnNormal->setText("普通模式");
+        btnHard->setText("困难模式");
+        btnBack->setText("返回");
+    }else if(language == "en"){
+        this->label->setText("please select difficulty");
+        btnEasy->setText("easy mode");
+        btnNormal->setText("normal mode");
+        btnHard->setText("hard mode");
+        btnBack->setText("back");
+    }
 }

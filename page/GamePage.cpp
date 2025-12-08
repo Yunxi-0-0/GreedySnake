@@ -41,6 +41,7 @@ void GamePage::initConnect(){
         gameArea->stop();
     });
     connect(gameArea, &GameArea::backEndSnakeScore, this, &GamePage::backEndScore);
+    connect(gameArea, &GameArea::addTime, upBar, &UpBar::addTime);
 }
 
 void GamePage::reset(){
@@ -81,3 +82,22 @@ void GamePage::setPlayerController(int player, QAction *action){
 void GamePage::backEndScore(Snake *snake){
     emit updateScoreRankings(snake->getName(), snake->getScore());
 }
+
+void GamePage::changeDifficulty(int difficulty){
+    this->difficulty = difficulty;
+    gameArea->setDifficulty(difficulty);
+}
+
+void GamePage::changePlayerName(int player, QString name){
+    gameArea->setSnakeName(player, name);
+    upBar->changePlayerName(player, name);
+}
+
+void GamePage::changeLanguage(QString language){
+    upBar->changeLanguage(language);
+}
+
+void GamePage::changeVolume(double volume){
+    gameArea->changeVolume(volume);
+}
+

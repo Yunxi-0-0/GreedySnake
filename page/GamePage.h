@@ -4,6 +4,7 @@
 #include <qaction.h>
 #include "../component/UpBar.h"
 #include "../component/GameArea.h"
+#include "qobject.h"
 #include "qtmetamacros.h"
 
 class GamePage : public QWidget{
@@ -11,7 +12,6 @@ class GamePage : public QWidget{
 public:
     GamePage(QWidget *parent = nullptr);
 private:
-
     UpBar *upBar;
     GameArea *gameArea;
     GameOverDialog *gameOverDialog;
@@ -19,6 +19,7 @@ private:
     void initConnect();
 
     bool isRunning = false;
+    int difficulty = 2;
 
 signals:
     void exitGame();
@@ -32,7 +33,10 @@ public slots:
     void setPlayerColour(int player, QAction *action);
     void setPlayerController(int player, QAction *action);
     void backEndScore(Snake *snake);
-
+    void changeDifficulty(int difficulty);
+    void changePlayerName(int player, QString name);
+    void changeLanguage(QString language);
+    void changeVolume(double volume);
 
 };
 

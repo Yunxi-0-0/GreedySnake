@@ -1,4 +1,6 @@
 #pragma once
+#include "qcombobox.h"
+#include "qlabel.h"
 #include <QWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -16,13 +18,19 @@ public:
 private:
     QPushButton *backButton;
     QSlider *volumeSlider;       // 音量控制滑块
+    QLabel *volumeLabel;         // 音量显示标签
     QComboBox *langCombo;        // 语言选择下拉框
+    QLabel *langLabel;           // 语言显示标签
     QTranslator *m_translator;   // 翻译器指针（关联主窗口）
+    QComboBox *themeCombo;       // 主题选择下拉框
+    QLabel *themeLabel;          // 主题显示标签
+    void setLanguage(const QString &lang); // 设置语言
 
 signals:
     void backButtonClicked();                     // 返回按钮信号
-    void volumeChanged(int volume);               // 音量变化信号
+    void volumeChanged(double volume);               // 音量变化信号
     void languageChanged(const QString &lang);    // 语言变化信号
+    void themeChanged(const QString &theme);     // 主题变化信号
 
 private slots:
     void onBackButtonClicked();   // 返回按钮点击槽函数
