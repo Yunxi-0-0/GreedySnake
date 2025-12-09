@@ -42,6 +42,7 @@ void GamePage::initConnect(){
     });
     connect(gameArea, &GameArea::backEndSnakeScore, this, &GamePage::backEndScore);
     connect(gameArea, &GameArea::addTime, upBar, &UpBar::addTime);
+    connect(upBar, &UpBar::endGame, gameArea, &GameArea::emitGameOver);
 }
 
 void GamePage::reset(){

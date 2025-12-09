@@ -683,3 +683,7 @@ void GameArea::changeVolume(double volume){
     this->diedAudioOutput->setVolume(volume);
 }
 
+void GameArea::emitGameOver(){
+    emit gameOver();
+}
+

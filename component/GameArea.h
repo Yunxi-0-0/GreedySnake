@@ -86,6 +86,7 @@ public slots:
     void setDifficulty(int difficulty);
     void playDiedSound();
     void changeVolume(double volume);
+    void emitGameOver();
 
 signals:
     void scoreChanged(int player, int score);

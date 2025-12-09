@@ -11,6 +11,7 @@ class UpBar : public QWidget{
 public:
     UpBar(QWidget *parent = nullptr);
 private:
+    QPushButton *endBtn;
     QPushButton *homeBtn;
     QPushButton *stopBtn;
     QPushButton *startBtn;
@@ -21,7 +22,7 @@ private:
     QString Score = " Score: ";
     QLabel *timeLabel;
     QString Time = " Time: ";
-    QTime *time;
+    QTime time;
     QString playerName ="Unnamed Snake";
     QString playerName2 ="Unnamed Snake";
     QString playerName3 ="Unnamed Snake";
@@ -41,6 +42,7 @@ public slots:
     void addTime();
 
 signals:
+    void endGame();
     void startGame();
     void stopGame();
 
