@@ -138,3 +138,70 @@ void RankingPage::saveRankings(){
     }
     file.close();
 }
+
+void RankingPage::onUpdateScoreRankings(QString name, int score){
+    qDebug() <<name << score;
+    // update score and date
+    int rows = table->rowCount();
+    bool updated = false;
+    for(int i=0;i<rows;i++){
+        if(table->item(i,1)->text() == name){
+            table->setItem(i, 2, new QTableWidgetItem(QString::number(score)));
+            table->setItem(i, 3, new QTableWidgetItem(QDateTime::currentDateTime().toString()));
+            updated = true;
+            break;
+        }
+    }
+    if(!updated){
+        // add new row
+        table->insertRow(0);
+        table->setItem(0, 0, new QTableWidgetItem("1"));
+        table->setItem(0, 1, new QTableWidgetItem(name));
+        table->setItem(0, 2, new QTableWidgetItem(QString::number(score)));
+        table->setItem(0, 3, new QTableWidgetItem(QDateTime::currentDateTime().toString()));
+    }
+    for(int i=0;i<rows;i++){
+        table->item(i,0)->setText(QString::number(i+1));
+    }
+    // sort by score descending
+    for(int i=0;i<rows-1;i++){
+        for(int j=i+1;j<rows;j++){
+            bool ok1, ok2;
+            int s1 = table->item(i,2)->text().toInt(&ok1);
+            int s2 = table->item(j,2)->text().toInt(&ok2);
+            if(!ok1) s1 = 0;
+            if(!ok2) s2 = 0;
+            if(s1 < s2){
+                // swap rows
+                table->insertRow(i);
+                // table->setRow(i, table->takeRow(j));
+                table->removeRow(j);
+                break;
+            }
+        }
+    }
+    // save to file
+    saveRankings();
+
+
+}
+
+void RankingPage::changeLanguage(QString lang){
+    if(lang == "en"){
+        titleLabel->setText("Ranking");
+        backButton->setText("Back");
+        refreshButton->setText("Refresh");
+        clearButton->setText("Clear");
+        QStringList headers;
+        headers << "Rank" << "Name" << "Score" << "Date";
+        table->setHorizontalHeaderLabels(headers);
+    }else if(lang == "zh"){
+        titleLabel->setText("排行榜");
+        backButton->setText("返回");
+        refreshButton->setText("刷新");
+        clearButton->setText("清空");
+        QStringList headers;
+        headers << "排名" << "姓名" << "分数" << "日期";
+        table->setHorizontalHeaderLabels(headers);
+    }
+}

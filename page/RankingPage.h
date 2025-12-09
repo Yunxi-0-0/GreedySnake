@@ -1,4 +1,5 @@
 #pragma once
+#include "qobject.h"
 #include "qtmetamacros.h"
 #include <QObject>
 #include <QWidget>
@@ -25,4 +26,6 @@ signals:
 public slots:
     void onRefreshClicked();
     void onClearClicked();
+    void onUpdateScoreRankings(QString name, int score);
+    void changeLanguage(QString language);
 };

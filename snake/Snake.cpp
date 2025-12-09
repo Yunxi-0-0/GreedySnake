@@ -408,6 +408,9 @@ QString Snake::getName() const{
     if(!name.isEmpty()){
         return name;
     }
+    if(isAi){
+        return "AI";
+    }
     return "Unnamed Snake";
     
 }

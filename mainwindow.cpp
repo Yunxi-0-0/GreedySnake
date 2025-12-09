@@ -114,6 +114,8 @@ void MainWindow::initConnections(){
 
     connect(settingPage, &SettingPage::themeChanged, this, &MainWindow::applyTheme);
 
+    connect(gamePage, &GamePage::updateScoreRankings, rankingPage, &RankingPage::onUpdateScoreRankings);
+
 }
 
 void MainWindow::applyTheme(QString theme){
@@ -143,14 +145,14 @@ void MainWindow::changeLanguage(QString language){
     if(language == "zh"){
         this->setWindowTitle("贪吃蛇");
         startPage->changeLanguage(language);
-        // rankingPage->changeLanguage(language);
+        rankingPage->changeLanguage(language);
         gamePage->changeLanguage(language);
         difficultyPage->changeLanguage(language);
         middlePage->changeLanguage(language);
     }else if(language == "en"){
         this->setWindowTitle("GreedySnake");
         startPage->changeLanguage(language);
-        // rankingPage->changeLanguage(language);
+        rankingPage->changeLanguage(language);
         gamePage->changeLanguage(language);
         difficultyPage->changeLanguage(language);
         middlePage->changeLanguage(language);

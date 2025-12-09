@@ -93,6 +93,7 @@ GameArea::GameArea(QWidget *parent) : QWidget(parent){
     });
     connect(this, &GameArea::gameOver, this, [this](){
         stop();
+        backEnd();
 
     });
     connect(this, &GameArea::snakeCollided, this, &GameArea::snakeDied);
